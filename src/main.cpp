@@ -1,8 +1,14 @@
 #include "Arduino.h"
-#include "Wifi.h"
+#include "MLX90393.h"
+#include "TactileSensor.h"
+#include "Wire.h"
 #include "CommandPrompt.h"
+#include "Wifi.h"
 
 // Global Variables
+TactileSensor sensor(1);
+vector3Double data;
+bool read_flag = false;
 String cmd;
 CommandPrompt prompt;
 
@@ -11,8 +17,8 @@ IPAddress local_IP(192, 168, 0, 11);
 IPAddress gateway(192, 168, 0, 1);
 IPAddress subnet(255, 255, 255, 0);
 
-String ssid = "SKYJTGZQ";
-String passwd = "4qkgA7K9N53T";
+String ssid = "";
+String passwd = "";
 int status = WL_IDLE_STATUS;
 WiFiServer server(80);
 
@@ -20,12 +26,18 @@ void setup() {
     // Initialize Serial
     Serial.begin(9600);
 
+    // Initialize I2C communication and serial bus
+    Wire.begin();
+
+    // Initilialize Hall Effect Sensor
+    sensor.init();
+
+    // Initialize WiFi
     // Configures static IP address
     if (!WiFi.config(local_IP, gateway, subnet)) {
         Serial.println("STA Failed to configure");
     }
 
-    // WiFi Initialization
     Serial.print("Attempting to connect to WPA network, SSID: ");
     Serial.print(ssid);
     Serial.println();
@@ -61,6 +73,19 @@ void loop() {
         cmd = client.readString();
         Serial.println(cmd);
         client.println(cmd);
+        prompt.setOption(cmd);
+        int cmd_option = prompt.getOption();
+        if (cmd_option == 5){
+            int sample = 50;
+            for(int i = 0; i < sample; i++) {
+                data = sensor.readData();
+                Serial.println(String(data.x) + "," + String(data.y) + "," + String(data.z));
+            };
+        }
+        else {
+            Serial.println("Not command collect...");
+        }
+        
         prompt.prompt();
     }
 }
