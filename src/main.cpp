@@ -1,8 +1,10 @@
 #include "Arduino.h"
 #include "Wifi.h"
+#include "CommandPrompt.h"
 
 // Global Variables
 String cmd;
+CommandPrompt prompt;
 
 // WiFi Configuration -- need to move to config file
 IPAddress local_IP(192, 168, 0, 11);
@@ -49,6 +51,7 @@ void setup() {
 
     // Wait for Serial Bus to open
     delay(1000);
+    prompt.prompt();
 };
 
 void loop() {
@@ -58,5 +61,6 @@ void loop() {
         cmd = client.readString();
         Serial.println(cmd);
         client.println(cmd);
+        prompt.prompt();
     }
 }
