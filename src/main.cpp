@@ -4,6 +4,7 @@
 #include "Wire.h"
 #include "CommandPrompt.h"
 #include "Wifi.h"
+#include "RBHServer.h"
 
 // Global Variables
 TactileSensor sensor(1);
@@ -11,16 +12,7 @@ vector3Double data;
 bool read_flag = false;
 String cmd;
 CommandPrompt prompt;
-
-// WiFi Configuration -- need to move to config file
-IPAddress local_IP(192, 168, 0, 11);
-IPAddress gateway(192, 168, 0, 1);
-IPAddress subnet(255, 255, 255, 0);
-
-String ssid = "";
-String passwd = "";
-int status = WL_IDLE_STATUS;
-WiFiServer server(80);
+RBHServer rbhserver;
 
 void setup() {
     // Initialize Serial
@@ -32,34 +24,11 @@ void setup() {
     // Initilialize Hall Effect Sensor
     sensor.init();
 
-    // Initialize WiFi
-    // Configures static IP address
-    if (!WiFi.config(local_IP, gateway, subnet)) {
-        Serial.println("STA Failed to configure");
-    }
-
-    Serial.print("Attempting to connect to WPA network, SSID: ");
-    Serial.print(ssid);
-    Serial.println();
-    status = WiFi.begin(ssid, passwd);
-
-    while (status != WL_CONNECTED) {
-        delay(3000);
-        Serial.print("Attempting to connect to WPA network, SSID: ");
-        Serial.print(ssid);
-        Serial.println();
-        status = WiFi.begin(ssid, passwd);
-    }
-    
-    // Set Static IP Address
-    IPAddress myAddress = WiFi.localIP();
-    Serial.print("Server Address: ");
-    Serial.print(myAddress);
-    Serial.println();
-
-    // Start Server
-    Serial.println("Connected to wifi...starting server");
-    server.begin();
+    // Initialize RBH Server
+    String ssid = "";
+    String passwd = "";
+    rbhserver.init(ssid, passwd);   // Start WiFi connection
+    rbhserver.start_server();       // Start Server
 
     // Wait for Serial Bus to open
     delay(1000);
@@ -67,20 +36,30 @@ void setup() {
 };
 
 void loop() {
-    WiFiClient client = server.available();
-    if (client) {
+    WiFiClient client = rbhserver.server.available();
+    if (client) 
+    {
         Serial.println("Client connected..");
+        // Read command
         cmd = client.readString();
         Serial.println(cmd);
-        client.println(cmd);
-        prompt.setOption(cmd);
+        // Set command option
+        prompt.setOption(cmd);  // this method should return integer
         int cmd_option = prompt.getOption();
-        if (cmd_option == 5){
-            int sample = 50;
-            for(int i = 0; i < sample; i++) {
+        if (cmd_option == 5) 
+        {
+            int sample = 10;
+            // Send initial byte for client to prepare reading
+            client.print('/n');
+            // Send data
+            for (int i = 0; i < sample; i++) 
+            {
                 data = sensor.readData();
                 Serial.println(String(data.x) + "," + String(data.y) + "," + String(data.z));
+                client.print(String(data.x) + "," + String(data.y) + "," + String(data.z) + ",");
             };
+            // Send terminating byte
+            client.print('n');
         }
         else {
             Serial.println("Not command collect...");
