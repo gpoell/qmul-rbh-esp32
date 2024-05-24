@@ -50,16 +50,14 @@ void loop() {
         {
             int sample = 10;
             // Send initial byte for client to prepare reading
-            client.print('/n');
+            client.print('1');
             // Send data
             for (int i = 0; i < sample; i++) 
             {
                 data = sensor.readData();
                 Serial.println(String(data.x) + "," + String(data.y) + "," + String(data.z));
-                client.print(String(data.x) + "," + String(data.y) + "," + String(data.z) + ",");
+                client.print(String(data.x) + "," + String(data.y) + "," + String(data.z));
             };
-            // Send terminating byte
-            client.print('n');
         }
         else {
             Serial.println("Not command collect...");
