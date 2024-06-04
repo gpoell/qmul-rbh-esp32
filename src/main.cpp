@@ -4,7 +4,7 @@
 #include "MLX90393.h"
 #include "TactileSensor.h"
 #include "CommandPrompt.h"
-#include "RBHServer.h"
+#include "ESPServer.h"
 
 // Global Variables
 TactileSensor sensor(1);
@@ -12,7 +12,7 @@ vector3Double data;
 bool read_flag = false;
 String cmd;
 CommandPrompt prompt;
-RBHServer rbhserver;
+WiFiServer server(80);
 
 void setup() {
     // Initialize Serial
@@ -25,10 +25,9 @@ void setup() {
     sensor.init();
 
     // Initialize RBH Server
-    String ssid = "";
-    String passwd = "";
-    rbhserver.init(ssid, passwd);   // Start WiFi connection
-    rbhserver.start_server();       // Start Server
+    const char ssid[] = "";
+    const char passwd[] = "";
+    esp_server_init(server, ssid, passwd);
 
     // Wait for Serial Bus to open
     delay(1000);
@@ -36,7 +35,7 @@ void setup() {
 };
 
 void loop() {
-    WiFiClient client = rbhserver.server.available();
+    WiFiClient client = server.available();
     if (client) 
     {
         Serial.println("Client connected..");
