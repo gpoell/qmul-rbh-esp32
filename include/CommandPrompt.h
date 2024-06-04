@@ -1,6 +1,7 @@
 #ifndef TactileLogger_h
 #define TactileLogger_h
-#include "Arduino.h"
+
+#include <Arduino.h>
 
 class CommandPrompt {
     private:
