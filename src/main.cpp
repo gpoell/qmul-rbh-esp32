@@ -25,9 +25,7 @@ void setup() {
     sensor.init();
 
     // Initialize RBH Server
-    const char ssid[] = "";
-    const char passwd[] = "";
-    esp_server_init(server, ssid, passwd);
+    esp_server_init(server);
 
     // Wait for Serial Bus to open
     delay(1000);

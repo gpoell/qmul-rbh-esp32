@@ -3,6 +3,6 @@
 
 #include <WiFi.h>
 
-void esp_server_init(WiFiServer& server, const char* ssid, const char* passwd);
+void esp_server_init(WiFiServer& server);
 
 #endif

@@ -1,5 +1,6 @@
 #include <iostream>
 #include "ESPServer.h"
+#include "secrets.h"
 
 using namespace std;
 
@@ -13,11 +14,12 @@ void set_ipaddress() {
     };
 };
 
-void connect_network(const char* ssid, const char* passwd) {
+void connect_network() {
     int status {WL_IDLE_STATUS};
+    wifi_creds w;
     while (status != WL_CONNECTED) {
-        cout  << "Attempting to connect to network: " << ssid << endl;
-        status = WiFi.begin(ssid, passwd);
+        cout  << "Attempting to connect to network: " << w.ssid << endl;
+        status = WiFi.begin(w.ssid, w.passwd);
         delay(3000);
     };
 };
@@ -27,8 +29,8 @@ void start_server(WiFiServer& server) {
     server.begin();
 };
 
-void esp_server_init(WiFiServer& server, const char* ssid, const char* passwd) {
-    set_ipaddress();                // Set Static IP Address
-    connect_network(ssid, passwd);  // Connect to Network
-    start_server(server);           // Start Server
+void esp_server_init(WiFiServer& server) {
+    set_ipaddress();        // Set Static IP Address
+    connect_network();      // Connect to Network
+    start_server(server);   // Start Server
 };
