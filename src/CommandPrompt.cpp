@@ -1,5 +1,5 @@
+#include <Arduino.h>
 #include "CommandPrompt.h"
-#include "Arduino.h"
 
 void CommandPrompt::prompt() {
     Serial.println("----------------------------------------------------------------------------------------------------");

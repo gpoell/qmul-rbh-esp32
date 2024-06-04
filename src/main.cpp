@@ -1,9 +1,9 @@
-#include "Arduino.h"
+#include <Arduino.h>
+#include <Wire.h>
+#include <WiFi.h>
 #include "MLX90393.h"
 #include "TactileSensor.h"
-#include "Wire.h"
 #include "CommandPrompt.h"
-#include "Wifi.h"
 #include "RBHServer.h"
 
 // Global Variables
