@@ -5,6 +5,7 @@
 #include "TactileSensor.h"
 #include "CommandPrompt.h"
 #include "ESPServer.h"
+#include "L9110HMotor.h"
 
 // Global Variables
 TactileSensor sensor(1);
@@ -13,6 +14,7 @@ bool read_flag = false;
 String cmd;
 CommandPrompt prompt;
 WiFiServer server(80);
+L9110HMotor motor;
 
 void setup() {
     // Initialize Serial
@@ -27,15 +29,17 @@ void setup() {
     // Initialize RBH Server
     esp_server_init(server);
 
-    // Wait for Serial Bus to open
+    // Initialize Motor
+    motor.init();
+
+    // Start Prompt
     delay(1000);
     prompt.prompt();
 };
 
 void loop() {
     WiFiClient client = server.available();
-    if (client) 
-    {
+    if (client) {
         Serial.println("Client connected..");
         // Read command
         cmd = client.readString();
@@ -55,6 +59,16 @@ void loop() {
                 Serial.println(String(data.x) + "," + String(data.y) + "," + String(data.z));
                 client.print(String(data.x) + "," + String(data.y) + "," + String(data.z));
             };
+        }
+        else if (cmd == "open") {
+            motor.open();
+            client.print('1');
+            client.print(cmd);
+        }
+        else if (cmd == "close") {
+            motor.close();
+            client.print('1');
+            client.print(cmd);
         }
         else {
             Serial.println("Not command collect...");
