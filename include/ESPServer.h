@@ -29,7 +29,6 @@
 #include "TactileSensor.h"
 #include "L9110HMotor.h"
 
-enum CommandOption { help, clear, calibrate, read, stop, collect, open, close };
 
 class ESPServer {
     private:
@@ -38,12 +37,14 @@ class ESPServer {
         TactileSensor sensor{1};
         L9110HMotor motor;
         vector3Double data;
+        enum CommandOption { help, clear, calibrate, read, stop, collect, open, close };
+        CommandOption command;
     public:
         ESPServer(const int port) : server(port) {};
         ~ESPServer() {};
         void init();
         WiFiClient client_available();
-        CommandOption set_cmd_option(const String& cmd);
+        void set_cmd_option(const String& cmd);
         void process_command(const String& cmd, WiFiClient& client);
 };
 

@@ -4,6 +4,8 @@
 using namespace std;
 
 static void start_server(WiFiServer& server);
+static void set_ipaddress();
+static void connect_network();
 
 void ESPServer::init() {
     Serial.begin(9600);         // Initialize Serial
@@ -18,19 +20,19 @@ WiFiClient ESPServer::client_available() {
     return server.available();
 };
 
-CommandOption ESPServer::set_cmd_option(const String& cmd) {
-    if (cmd.equals("clear")) { return clear; }
-    else if (cmd.equals("open")) { return open; }
-    else if (cmd.equals("close")) { return close; }
-    else if (cmd.startsWith("calibrate")) { return calibrate; }
-    else if (cmd.equals("read")) { return read; }
-    else if (cmd.equals("stop")) { return stop; }
-    else if (cmd.startsWith("collect")) { return collect; }
-    else { return help; }
+void ESPServer::set_cmd_option(const String& cmd) {
+    if (cmd.equals("clear")) { command = clear; }
+    else if (cmd.equals("open")) { command = open; }
+    else if (cmd.equals("close")) { command = close; }
+    else if (cmd.startsWith("calibrate")) { command = calibrate; }
+    else if (cmd.equals("read")) { command = read; }
+    else if (cmd.equals("stop")) { command = stop; }
+    else if (cmd.startsWith("collect")) { command = collect; }
+    else { command = help; }
 };
 
 void ESPServer::process_command(const String& cmd, WiFiClient& client) {
-    CommandOption command = set_cmd_option(cmd); // smart pointer?
+    set_cmd_option(cmd); // smart pointer?
     switch (command) {
         case open:
             motor.open();
@@ -45,16 +47,16 @@ void ESPServer::process_command(const String& cmd, WiFiClient& client) {
         case calibrate:
             break;
         case collect:
-            const int sample = 10;
-            // Send initial byte for client to prepare reading
-            client.print('1');
-            for(int i=0; i<sample; i++){
-                data = sensor.readData();
-                Serial.println(String(data.x) + "," + String(data.y) + "," + String(data.z));
-                client.print(String(data.x) + "," + String(data.y) + "," + String(data.z) + ",");
-            };
-            // Send terminating byte
-            client.print('n');
+            {
+                const int sample = 3;
+                // Send initial byte for client to prepare reading
+                client.print('1');
+                for(int i=0; i<sample; i++){
+                    data = sensor.readData();
+                    Serial.println(String(data.x) + "," + String(data.y) + "," + String(data.z));
+                    client.print(String(data.x) + "," + String(data.y) + "," + String(data.z));
+                };
+            }
             break;
         case read:
             break;
