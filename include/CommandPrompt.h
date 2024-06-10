@@ -1,20 +1,21 @@
+/*
+ * Command Prompt displays informative messages to the user based on commands
+ * sent by the GUI or the Serial Monitor interface.
+ */
+
 #ifndef TactileLogger_h
 #define TactileLogger_h
 
 #include <Arduino.h>
 
 class CommandPrompt {
-    private:
-        int option;
     public:
+        CommandPrompt() {};
+        ~CommandPrompt() {};
         void prompt();
+        void clear();
         void help();
         void invalid();
-        void clear();
-        void stop();
-        void readCommand(String cmd);
-        void setOption(String cmd);
-        int getOption();
 };
 
 #endif

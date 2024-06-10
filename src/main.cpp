@@ -1,79 +1,24 @@
 #include <Arduino.h>
-#include <Wire.h>
-#include <WiFi.h>
-#include "MLX90393.h"
-#include "TactileSensor.h"
-#include "CommandPrompt.h"
 #include "ESPServer.h"
-#include "L9110HMotor.h"
 
-// Global Variables
-TactileSensor sensor(1);
-vector3Double data;
-bool read_flag = false;
-String cmd;
-CommandPrompt prompt;
-WiFiServer server(80);
-L9110HMotor motor;
+ESPServer espserver {80};
 
 void setup() {
-    // Initialize Serial
-    Serial.begin(9600);
-
-    // Initialize I2C communication and serial bus
-    Wire.begin();
-
-    // Initilialize Hall Effect Sensor
-    sensor.init();
-
-    // Initialize RBH Server
-    esp_server_init(server);
-
-    // Initialize Motor
-    motor.init();
-
-    // Start Prompt
-    delay(1000);
-    prompt.prompt();
+    // Initialize ESP Server
+    espserver.init();
 };
 
 void loop() {
-    WiFiClient client = server.available();
+    // Wait for Client (GUI) to send command
+    WiFiClient client = espserver.client_available();
     if (client) {
-        Serial.println("Client connected..");
-        // Read command
-        cmd = client.readString();
-        Serial.println(cmd);
-        // Set command option
-        prompt.setOption(cmd);  // this method should return integer
-        int cmd_option = prompt.getOption();
-        if (cmd_option == 5) 
-        {
-            int sample = 10;
-            // Send initial byte for client to prepare reading
-            client.print('1');
-            // Send data
-            for (int i = 0; i < sample; i++) 
-            {
-                data = sensor.readData();
-                Serial.println(String(data.x) + "," + String(data.y) + "," + String(data.z));
-                client.print(String(data.x) + "," + String(data.y) + "," + String(data.z));
-            };
-        }
-        else if (cmd == "open") {
-            motor.open();
-            client.print('1');
-            client.print(cmd);
-        }
-        else if (cmd == "close") {
-            motor.close();
-            client.print('1');
-            client.print(cmd);
-        }
-        else {
-            Serial.println("Not command collect...");
-        }
         
-        prompt.prompt();
+        // Read command
+        Serial.println("Client connected..");
+        const String cmd = client.readStringUntil('\0');
+        Serial.println(cmd);
+        
+        // Process command
+        espserver.process_command(cmd, client);
     }
 }
