@@ -4,8 +4,11 @@
 using namespace std;
 
 static void start_server(WiFiServer& server);
+<<<<<<< HEAD
 static void set_ipaddress();
 static void connect_network();
+=======
+>>>>>>> 7545981e90cf90c8e7029f32242f6b44ff53f229
 
 void ESPServer::init() {
     Serial.begin(9600);         // Initialize Serial
