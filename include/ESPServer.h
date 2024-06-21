@@ -1,21 +1,26 @@
 /*
  * ESP Server manages the WiFi, Tactile Sensor, and Motor components, and facilitates 
  * the processing of commands sent by the GUI.
- *      Components
- *          - Wi-Fi Server:     creates a server that listens for incoming connections on
- *                              a specified port.
+ *      
+ * Attributes:
+ *    
+ *      server <WiFiServer>:     creates a server that listens for incoming connections on
+ *                               a specified port.
+ *      guiClient <WiFiClient>:  persists the client for sending tactile data
+ *      prompt <CommandPrompt>:  displays important information to the user through the
+ *                               Serial Monitor.
+ *      sensor <TactileSensor>:  collects magnetic flux density recordings from the
+ *                               Hall Effect sensors
+ *      motor <L9110HMotor>:     opens and closes the gripper
+ *      data <vector3Double>:    structure of integers for capturing sensor recordings
+ *      connected <bool>:        indicator for sending tactile data to GUI
  * 
- *          - Command Prompt:   displays important information to the user through the
- *                              Serial monitor.
+ * Methods:
  * 
- *          - Tactile Sensor:   collects magnetic flux density recordings from the Hall
- *                              Effect sensors.
- *  
- *          - L9110H Motor:     controls the direction of the motor for opening and closing
- *                              the gripper.
+ *     process_command:          executes gripper functionality based on commands
+ *     is_connected:             returns the connection status for reading tactile data
+ *     get_tactile_data:         sends tactile data recordings to the GUI
  * 
- *      Parameters
- *          - port:             port for server to listen to incoming requests (default is 80)
  */
 
 #ifndef ESPServer_h
@@ -32,20 +37,22 @@
 
 class ESPServer {
     private:
-        WiFiServer server {80};
+        WiFiServer server {5000};
+        WiFiClient guiClient;
         CommandPrompt prompt;
         TactileSensor sensor{1};
         L9110HMotor motor;
         vector3Double data;
-        enum CommandOption { help, clear, calibrate, read, stop, collect, open, close };
-        CommandOption command;
+        bool connected {false};
+
     public:
         ESPServer(const int port) : server(port) {};
         ~ESPServer() {};
         void init();
         WiFiClient client_available();
-        void set_cmd_option(const String& cmd);
         void process_command(const String& cmd, WiFiClient& client);
+        bool is_connected() {return connected;};
+        void get_tactile_data();
 };
 
 #endif

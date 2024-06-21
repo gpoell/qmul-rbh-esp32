@@ -20,56 +20,23 @@ WiFiClient ESPServer::client_available() {
     return server.available();
 };
 
-void ESPServer::set_cmd_option(const String& cmd) {
-    if (cmd.equals("clear")) { command = clear; }
-    else if (cmd.equals("open")) { command = open; }
-    else if (cmd.equals("close")) { command = close; }
-    else if (cmd.startsWith("calibrate")) { command = calibrate; }
-    else if (cmd.equals("read")) { command = read; }
-    else if (cmd.equals("stop")) { command = stop; }
-    else if (cmd.startsWith("collect")) { command = collect; }
-    else { command = help; }
-};
+void ESPServer::get_tactile_data() {
+    data = sensor.readData();
+    guiClient.print(String(data.x) + "," + String(data.y) + "," + String(data.z));
+}
 
 void ESPServer::process_command(const String& cmd, WiFiClient& client) {
-    set_cmd_option(cmd); // smart pointer?
-    switch (command) {
-        case open:
-            motor.open();
-            client.print('1');
-            client.print(cmd);
-            break;
-        case close:
-            motor.close();
-            client.print('1');
-            client.print(cmd);
-            break;
-        case calibrate:
-            break;
-        case collect:
-            {
-                const int sample = 3;
-                // Send initial byte for client to prepare reading
-                client.print('1');
-                for(int i=0; i<sample; i++){
-                    data = sensor.readData();
-                    Serial.println(String(data.x) + "," + String(data.y) + "," + String(data.z));
-                    client.print(String(data.x) + "," + String(data.y) + "," + String(data.z));
-                };
-            }
-            break;
-        case read:
-            break;
-        case stop:
-            break;
-        case help:
-            prompt.help();
-            break;
-        default:
-            prompt.invalid();
-            prompt.help();
-            break;
-    };
+
+    if (cmd.startsWith("connect")) { connected = true; guiClient = client; }
+    else if (cmd.equals("disconnect")) { connected = false; }
+    else if (cmd.equals("open")) { motor.open(); }
+    else if (cmd.equals("close")) { motor.close(); }
+    else if (cmd.startsWith("calibrate")) {}
+    else if (cmd.startsWith("collect")) {}
+    else if (cmd.startsWith("help")) { prompt.help(); }
+    else { prompt.invalid(); }
+
+    client.print('1');
     prompt.prompt();
 };
 
@@ -79,10 +46,10 @@ void ESPServer::process_command(const String& cmd, WiFiClient& client) {
  */
 
 static void start_server(WiFiServer& server) {
-    set_ipaddress();        // Set Static IP Address
-    connect_network();      // Connect to Network
-    server.begin();         // Start Server
-    cout << "Connected to wifi...starting server" << endl;
+    set_ipaddress();
+    connect_network();
+    server.begin();
+    cout << "[INFO] Connected to wifi...starting server" << endl;
 };
 
 static void set_ipaddress() {
@@ -92,7 +59,7 @@ static void set_ipaddress() {
 
     // Output an error message if the static IP address assignment fails
     if (!WiFi.config(local_IP, gateway, subnet)) {
-        cout << "Assignment of static IP address failed..." << endl;
+        cout << "[WARNING] Assignment of static IP address failed..." << endl;
     };
 };
 
@@ -105,7 +72,7 @@ static void connect_network() {
 
     // Attempt to connect to network
     while (status != WL_CONNECTED) {
-        cout  << "Attempting to connect to network: " << w.ssid << endl;
+        cout  << "[INFO] Attempting to connect to network: " << w.ssid << endl;
         status = WiFi.begin(w.ssid, w.passwd);
         delay(3000);
     };

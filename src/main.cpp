@@ -1,24 +1,23 @@
 #include <Arduino.h>
 #include "ESPServer.h"
 
-ESPServer espserver {80};
+ESPServer espserver {5000};
 
 void setup() {
-    // Initialize ESP Server
     espserver.init();
 };
 
 void loop() {
-    // Wait for Client (GUI) to send command
+
+    // Process GUI or Serial Monitor Commands
     WiFiClient client = espserver.client_available();
-    if (client) {
-        
-        // Read command
-        Serial.println("Client connected..");
+    if (client || Serial.available()) {
         const String cmd = client.readStringUntil('\0');
-        Serial.println(cmd);
-        
-        // Process command
         espserver.process_command(cmd, client);
+    };
+
+    // Send Tactile Data when GUI is connected
+    if (espserver.is_connected()) {
+        espserver.get_tactile_data();
     }
 }
