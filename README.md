@@ -46,6 +46,7 @@ Open the repository with VS Code once PlatformIO is installed. PlatformIO should
 <b>Note:</b>  
 The Wi-Fi connection details are automatically read from a header file called secrets.h inside of the includes/ directory. This file should contain your connection details in the following format:  
 <b>secrets.h</b>
+
 ```
 #ifndef secrets_h
 #define secrets_h
@@ -57,4 +58,29 @@ struct wifi_creds {
 
 #endif
 ```
+</details>
+
+## Application Architecture
+The ESP32 contains a dual-core processor that is used to run two processes concurrently. The main process runs on Core 1 which actively listens for incoming client connections from the GUI. The commands sent from the GUI are passed to the [ESPServer](include/ESPServer.h) which serves as a gateway for executing tactile and motor functions. In addition to processing client commands, Core 1 executes motor related functions and returns back to listening for new client connections. Core 0 is responsible for continuously communicating tactile data to the GUI once it has detected the connection flag in the ESPServer is enabled. 
+
+<picture>
+    <img src='docs/esp_architecture.png'>
+</pictuer>
+
+<details>
+<summary>Arduino Wi-Fi</summary>
+
+The [Arduino Wi-Fi](https://www.arduino.cc/reference/en/libraries/wifi/) libraries are used to create the server running on the ESP32. During setup, the [ESPServer](include/ESPServer.h) is initialized which sets the IP configuration, connects to the network defined in secrets.h, and starts the [server](https://www.arduino.cc/reference/en/libraries/wifi/server.begin). Core1 actively listens and processes incoming [WiFiClient](https://www.arduino.cc/reference/en/libraries/wifi/wificlient) connections. Data is sent back to the GUI through the [client.print()](https://www.arduino.cc/reference/en/libraries/wifi/client.print) method.
+</details>
+
+<details>
+<summary>Tactile Sensor</summary>
+
+The [Tactile Sensor](include/TactileSensor.h) is composed of 4 [MLX90393](include/MLX90393.h) Hall Effect sensors that record magnetic flux density measurements in 3 dimensions. Each Hall Effect sensor has a magnet suspended slightly above it in a soft silicon material which create larger magnetic flux readings as they are pressed towards the sensors. These recordings are captured using I2C and the Arduino Wire library. The memory addresses containing the 3 dimensional recordings of for the Hall Effect sensors are found in its [datasheet](docs/MLX90393-Datasheet-Melexis.PDF). 
+</details>
+
+<details>
+<summary>L9110H Motor</summary>
+
+The actuator for the soft robotic gripper is a [RS PRO Brushed Geared DC Geared Motor](https://my.rs-online.com/web/p/dc-motors/4130600) connected to a [L9110H H-Bridge Motor Driver](https://www.adafruit.com/product/4489). The motor terminals can be connected to the ESP32 GPIO pins 18 and 19 where the direction of the motor is controlled by supplying power to one of the pins using Arduino's digitalWrite method. The [L9110H Motor](include/L9110HMotor.h) is a simple module containing methods for initializing the pins, and opening and closing the gripper.
 </details>
