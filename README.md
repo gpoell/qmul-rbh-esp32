@@ -84,3 +84,10 @@ The [Tactile Sensor](include/TactileSensor.h) is composed of 4 [MLX90393](includ
 
 The actuator for the soft robotic gripper is a [RS PRO Brushed Geared DC Geared Motor](https://my.rs-online.com/web/p/dc-motors/4130600) connected to a [L9110H H-Bridge Motor Driver](https://www.adafruit.com/product/4489). The motor terminals can be connected to the ESP32 GPIO pins 18 and 19 where the direction of the motor is controlled by supplying power to one of the pins using Arduino's digitalWrite method. The [L9110H Motor](include/L9110HMotor.h) is a simple module containing methods for initializing the pins, and opening and closing the gripper.
 </details>
+
+## Repository Folder Structure
+📁docs/         -- documents for the README
+📁include/      -- project header files
+📁lib/          -- project specific libraries
+📁src/          -- source code
+📁test/         -- project tests
