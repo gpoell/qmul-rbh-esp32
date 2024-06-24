@@ -85,10 +85,10 @@ The actuator for the soft robotic gripper is a [RS PRO Brushed Geared DC Geared 
 </details>
 
 ## Repository Folder Structure
-📁docs/         -- documents for the README
-📁include/      -- project header files
-📁lib/          -- project specific libraries
-📁src/          -- source code
+📁docs/         -- documents for the README  
+📁include/      -- project header files  
+📁lib/          -- project specific libraries  
+📁src/          -- source code  
 📁test/         -- project tests
 
 ## Helpful Articles
