@@ -10,9 +10,8 @@ This application is developed using [PlatformIO](https://docs.platformio.org/en/
 1. [Installation and Dependencies](https://github.com/gpoell/qmul-rbh-gui/tree/feature-update-readme?tab=readme-ov-file#installation-and-dependencies)
 2. [Running the Application](https://github.com/gpoell/qmul-rbh-gui/tree/feature-update-readme?tab=readme-ov-file#running-the-application)
 3. [Application Architecture](https://github.com/gpoell/qmul-rbh-gui/tree/feature-update-readme?tab=readme-ov-file#application-architecture)
-4. [PyQt Components](https://github.com/gpoell/qmul-rbh-gui/tree/feature-update-readme?tab=readme-ov-file#pyqt-components)
-5. [Repository Folder Structure](https://github.com/gpoell/qmul-rbh-gui/tree/feature-update-readme?tab=readme-ov-file#repository-folder-structure)
-6. [Helpful Articles](https://github.com/gpoell/qmul-rbh-gui/tree/feature-update-readme?tab=readme-ov-file#helpful-articles)
+4. [Repository Folder Structure](https://github.com/gpoell/qmul-rbh-gui/tree/feature-update-readme?tab=readme-ov-file#repository-folder-structure)
+5. [Helpful Articles](https://github.com/gpoell/qmul-rbh-gui/tree/feature-update-readme?tab=readme-ov-file#helpful-articles)
 
 ## Installation and Dependencies
 [Visual Studio Code](https://code.visualstudio.com/) is a powerful, lightweight editor that provides extensions for a variety of programming languages and frameworks. There is a [PlatformIO extension](https://docs.platformio.org/en/latest/integration/ide/vscode.html) that can easily be installed to use with VS Code.
@@ -91,3 +90,17 @@ The actuator for the soft robotic gripper is a [RS PRO Brushed Geared DC Geared 
 📁lib/          -- project specific libraries
 📁src/          -- source code
 📁test/         -- project tests
+
+## Helpful Articles
+<b>Wi-Fi</b>  
+
+[Arduino Wi-Fi](https://www.arduino.cc/reference/en/libraries/wifi/)
+[ESP32 Useful Wi-Fi Library Functions](https://randomnerdtutorials.com/esp32-useful-wi-fi-functions-arduino/)
+
+<b>PlatformIO</b>  
+
+[PlatformIO extension](https://docs.platformio.org/en/latest/integration/ide/vscode.html)
+
+<b>DC-Motor: Arduino</b>  
+
+[Arduino DC-Motor](https://arduinogetstarted.com/tutorials/arduino-dc-motor?utm_content=cmp-true)
