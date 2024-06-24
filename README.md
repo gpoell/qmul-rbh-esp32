@@ -62,6 +62,7 @@ struct wifi_creds {
 ## Application Architecture
 The ESP32 contains a dual-core processor that is used to run two processes concurrently. The main process runs on Core 1 which actively listens for incoming client connections from the GUI. The commands sent from the GUI are passed to the [ESPServer](include/ESPServer.h) which serves as a gateway for executing tactile and motor functions. In addition to processing client commands, Core 1 executes motor related functions and returns back to listening for new client connections. Core 0 is responsible for continuously communicating tactile data to the GUI once it has detected the connection flag in the ESPServer is enabled. 
 
+<b>ESP32 Server Architecture Diagram</b>
 <picture>
     <img src='docs/esp_architecture.png'>
 </pictuer>
