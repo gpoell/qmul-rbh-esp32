@@ -22,13 +22,23 @@ WiFiClient ESPServer::client_available() {
 
 void ESPServer::get_tactile_data() {
     data = sensor.readData();
-    guiClient.print(String(data.x) + "," + String(data.y) + "," + String(data.z));
-}
+    string message = to_string(data.x) + "," + to_string(data.y) + "," + to_string(data.z) + ",";
+    const char* result = create_buffer_message(message, 65);
+    guiClient.print(result);
+};
+
+const char* ESPServer::create_buffer_message(string& message, int size) {
+    int remainder = size - message.length() - 1;
+    string filler(remainder, '0');
+    message.append(filler);
+    const char* p = message.c_str();
+    return p;
+};
 
 void ESPServer::process_command(const String& cmd, WiFiClient& client) {
 
     if (cmd.startsWith("connect")) { connected = true; guiClient = client; }
-    else if (cmd.equals("disconnect")) { connected = false; }
+    else if (cmd.equals("disconnect")) { connected = false; guiClient.stop(); }
     else if (cmd.equals("open")) { motor.open(); }
     else if (cmd.equals("close")) { motor.close(); }
     else if (cmd.startsWith("calibrate")) {}
@@ -37,6 +47,7 @@ void ESPServer::process_command(const String& cmd, WiFiClient& client) {
     else { prompt.invalid(); }
 
     client.print('1');
+    client.stop();
     prompt.prompt();
 };
 

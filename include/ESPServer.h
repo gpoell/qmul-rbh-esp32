@@ -20,6 +20,7 @@
  *     process_command:          executes gripper functionality based on commands
  *     is_connected:             returns the connection status for reading tactile data
  *     get_tactile_data:         sends tactile data recordings to the GUI
+ *     create_buffer_message:    resizes the message to match the GUI buffer request
  * 
  */
 
@@ -53,6 +54,7 @@ class ESPServer {
         void process_command(const String& cmd, WiFiClient& client);
         bool is_connected() {return connected;};
         void get_tactile_data();
+        const char* create_buffer_message(std::string& message, int size);
 };
 
 #endif
