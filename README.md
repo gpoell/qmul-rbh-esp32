@@ -1,5 +1,6 @@
-# QMUL MSc Advanced Robotics
-# Soft Robotic Gripper: ESP32 Server
+# Queen Mary University of London
+## MSc Advanced Robotics
+### Soft Robotic Gripper - ESP32 Server
 
 ## Overview
 The soft robotic gripper contains an ESP32 MCU that is responsible for its actuation and reading tactile data from the Hall Effect sensors attached to the tips of the fingers. It can receive wireless commands using the [Graphical User Interface](https://github.com/gpoell/qmul-rbh-gui) designed to simplify the collection and visualization of tactile data. 
@@ -7,11 +8,15 @@ The soft robotic gripper contains an ESP32 MCU that is responsible for its actua
 This application is developed using [PlatformIO](https://docs.platformio.org/en/latest/what-is-platformio.html) which enables the use of the Arduino framework and the C++ STL to provide a development environment familiar to most students. The ESP32 contains 2 cores that allow for processes to run concurrently; one process actively listens for commands from the GUI to operate the motor while the other process continuously sends real-time tactile data to the GUI.  
 
 ## Table of Contents
-1. [Installation and Dependencies](https://github.com/gpoell/qmul-rbh-gui/tree/feature-update-readme?tab=readme-ov-file#installation-and-dependencies)
-2. [Running the Application](https://github.com/gpoell/qmul-rbh-gui/tree/feature-update-readme?tab=readme-ov-file#running-the-application)
-3. [Application Architecture](https://github.com/gpoell/qmul-rbh-gui/tree/feature-update-readme?tab=readme-ov-file#application-architecture)
-4. [Repository Folder Structure](https://github.com/gpoell/qmul-rbh-gui/tree/feature-update-readme?tab=readme-ov-file#repository-folder-structure)
-5. [Helpful Articles](https://github.com/gpoell/qmul-rbh-gui/tree/feature-update-readme?tab=readme-ov-file#helpful-articles)
+1. [Project Background](#project-background)
+1. [Installation and Dependencies](#installation-and-dependencies)
+2. [Running the Application](#running-the-application)
+3. [Application Architecture](#application-architecture)
+4. [Repository Folder Structure](#repository-folder-structure)
+5. [Helpful Articles](#helpful-articles)
+
+## Project Background
+My dissertation is focused on classifying strawberry ripeness using the tactile data from the soft robotic gripper. The goal is to develop a technique that emulates how we use our sense of touch to assess the quality of certain crops, like picking ripe avacados at a supermarket. Computer vision is a popular and efficient technique for assessing crop ripeness, especially now that modern cameras can see better than humans. However, not all crops show obvious signs of differentiable ripeness levels, and problems with computer vision still persist in occluded harvesting environments where cameras struggle to see through shadows or branches, which is still an issue while harvesting strawberries. Providing a simple technique using tactile data to reinforce what the camera sees with what the gripper feels could prove useful when harvesting in occluded environments and performing post harvest quality inspections.
 
 ## Installation and Dependencies
 [Visual Studio Code](https://code.visualstudio.com/) is a powerful, lightweight editor that provides extensions for a variety of programming languages and frameworks. There is a [PlatformIO extension](https://docs.platformio.org/en/latest/integration/ide/vscode.html) that can easily be installed to use with VS Code.
