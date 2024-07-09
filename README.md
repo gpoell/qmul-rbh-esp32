@@ -47,7 +47,7 @@ Open the repository with VS Code once PlatformIO is installed. PlatformIO should
 2. Upload the executable to the ESP32
 3. Open the Serial Monitor
 
-<b>Note:</b>  
+<b>IMPORTANT</b>  
 The WiFi connection details are automatically read from a header file called secrets.h inside of the includes/ directory. This file is included in the .gitignore so it should remain local to your workspace, and it should contain your connection details in the following format:  
 <b>secrets.h</b>
 
@@ -79,13 +79,13 @@ The diagram below illustrates an overview of how the ESP32 interfaces with the [
 <details>
 <summary>Arduino WiFi</summary>
 
-The [Arduino WiFi](https://www.arduino.cc/reference/en/libraries/wifi/) libraries are used to create the server running on the ESP32. During setup, the [ESP Server](include/ESPServer.h) is initialized which sets the IP configuration, connects to the network defined in secrets.h, and starts the [server](https://www.arduino.cc/reference/en/libraries/wifi/server.begin). Core1 actively listens and processes incoming [WiFiClient](https://www.arduino.cc/reference/en/libraries/wifi/wificlient) connections. Data is sent back to the GUI through the [client.print()](https://www.arduino.cc/reference/en/libraries/wifi/client.print) method.
+The [Arduino WiFi](https://www.arduino.cc/reference/en/libraries/wifi/) library is used to create the server running on the ESP32. During setup, the [ESP Server](include/ESPServer.h) is initialized which sets the IP configuration, connects to the network defined in secrets.h, and starts the [server](https://www.arduino.cc/reference/en/libraries/wifi/server.begin). Core1 actively listens and processes incoming [WiFiClient](https://www.arduino.cc/reference/en/libraries/wifi/wificlient) connections and sends data back to the GUI using the [WiFiClient methods](https://www.arduino.cc/reference/en/libraries/wifi/client.print) method.
 </details>
 
 <details>
 <summary>Tactile Sensor</summary>
 
-The [Tactile Sensor](include/TactileSensor.h) is composed of 4 [MLX90393](include/MLX90393.h) Hall Effect sensors that record magnetic flux density measurements in 3 dimensions. Each Hall Effect sensor has a magnet suspended slightly above it in a soft silicon material which create larger magnetic flux readings as they are pressed towards the sensors. These recordings are captured using I2C and the Arduino Wire library. The memory addresses containing the 3 dimensional recordings of for the Hall Effect sensors are found in its [datasheet](docs/MLX90393-Datasheet-Melexis.PDF). 
+The [Tactile Sensor](include/TactileSensor.h) is composed of 4 [MLX90393](include/MLX90393.h) [Hall Effect](https://en.wikipedia.org/wiki/Hall_effect) sensors that record magnetic flux density measurements in 3 dimensions. Each Hall Effect sensor has a magnet suspended slightly above it in a soft silicon material, and these sensors are attached to the fingertips of the gripper. When the gripper grasps an object, it pushes the suspended magnets closer to the Hall Effect sensors which increases the magnetic flux density recordings. This change in magnetic flux density is synonymous to the pressure being applied to a grasped object as a result of its stiffness, which for this project, is used to represent the ripeness stages of strawberries. These recordings are captured using the I2C protocol and are extracted from the memory addresses of the Hall Effect sensors found in its [datasheet](docs/MLX90393-Datasheet-Melexis.PDF). 
 </details>
 
 <details>
