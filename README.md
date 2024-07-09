@@ -14,7 +14,7 @@ The soft robotic gripper contains an ESP32 MCU that listens for remote commands 
 5. [Helpful Articles](#helpful-articles)
 
 ## Project Background
-My dissertation is focused on classifying strawberry ripeness using the tactile data from the soft robotic gripper. The goal is to develop a technique that emulates how we use our sense of touch to assess the quality of certain crops, like picking ripe avacados at a supermarket. Computer vision is a popular and efficient technique for assessing crop ripeness, especially now that modern cameras can see better than humans. However, not all crops are visually differentiable based on their ripeness levels, and problems with computer vision persist in occluded harvesting environments where cameras struggle to see through shadows or branches, which is a particular issue while harvesting strawberries. Providing a simple technique using tactile data to reinforce what cameras see with what the gripper feels could prove useful when harvesting in occluded environments and performing post-harvest quality inspections.
+My dissertation is focused on classifying strawberry ripeness using the tactile data from the soft robotic gripper. The goal is to develop a technique that emulates how we use our sense of touch to assess the quality of certain crops, like picking ripe avocados at a supermarket. Computer vision is a popular and efficient technique for assessing crop ripeness, especially now that modern cameras can see better than humans. However, not all crops are visually differentiable based on their ripeness levels, and problems with computer vision persist in occluded harvesting environments where cameras struggle to see through shadows or branches, which is a particular issue while harvesting strawberries. Providing a simple technique using tactile data to reinforce what cameras see with what the gripper feels could prove useful when harvesting in occluded environments and performing post-harvest quality inspections.
 
 ## Installation and Dependencies
 [Visual Studio Code](https://code.visualstudio.com/) is a powerful, lightweight editor that provides extensions for a variety of programming languages and frameworks. It contains a [PlatformIO extension](https://docs.platformio.org/en/latest/integration/ide/vscode.html) that can easily be installed to use with VS Code. I would recommend following the [Platform IDE for VSCode](https://docs.platformio.org/en/latest/integration/ide/vscode.html#ide-vscode) configuration instructions and tutorial to test your workspace before proceeding with working on this application.
@@ -46,7 +46,7 @@ Open the repository with VS Code once PlatformIO is installed. PlatformIO should
 3. Open the Serial Monitor
 
 <b>IMPORTANT</b>  
-The WiFi connection details are automatically read from a header file called secrets.h inside of the includes/ directory. This file is included in the .gitignore so it should remain local to your workspace, and it should contain your connection details in the following format:  
+The Wi-Fi connection details are automatically read from a header file called secrets.h inside of the includes/ directory. This file is included in the .gitignore so it should remain local to your workspace, and it should contain your connection details in the following format:  
 <b>secrets.h</b>
 
 ```
@@ -63,7 +63,7 @@ struct wifi_creds {
 </details>
 
 ## Application Architecture
-The application running on the ESP32 leverages the Arduino framework and design pattern. The [main](src/main.cpp) process starts by running a one-time setup followed by a continuous process that runs a majority of the logic for the application. Typical setup processes are used to assign values to global variables, initialize classes, and start class methods like activating serial communication so users can enter and display messages. All of the setup processes for this application are encapsulated in the [ESP Server](include/ESPServer.h) class which begins the [Serial](https://www.arduino.cc/reference/en/language/functions/communication/serial/), [I2C](https://www.arduino.cc/reference/en/language/functions/communication/wire/), and [WiFi](https://www.arduino.cc/reference/en/libraries/wifi/) communication methods along with initializing the [motor](include/L9110HMotor.h) and [tactile sensors](include/TactileSensor.h). The ESP Server also manages client connenctions, state variables, and determines which processes to run based on user input submitted through the GUI.
+The application running on the ESP32 leverages the Arduino framework and design pattern. The [main](src/main.cpp) process starts by running a one-time setup followed by a continuous process that runs a majority of the logic for the application. Typical setup processes are used to assign values to global variables, initialize classes, and start class methods like activating serial communication so users can enter and display messages. All of the setup processes for this application are encapsulated in the [ESP Server](include/ESPServer.h) class which begins the [Serial](https://www.arduino.cc/reference/en/language/functions/communication/serial/), [I2C](https://www.arduino.cc/reference/en/language/functions/communication/wire/), and [Wi-Fi](https://www.arduino.cc/reference/en/libraries/wifi/) communication methods along with initializing the [motor](include/L9110HMotor.h) and [tactile sensors](include/TactileSensor.h). The ESP Server also manages client connections, state variables, and determines which processes to run based on user input submitted through the GUI.
 
 The ESP32 contains a dual-core processor that is used to simultaneously operate the gripper while reading data from the tactile sensors. Core 1 actively listens for incoming remote [client connections](https://reference.arduino.cc/reference/en/libraries/wifi/wificlient/) from the GUI and processes the client commands through the ESP Server. It performs various tasks such as managing client connections, calibrating the sensors, and operating the motor through its [GPIO](https://www.arduino.cc/reference/en/language/functions/digital-io/digitalwrite/) pins. Core 0 is primarily used to read data from the tactile sensors using the [I2C](https://www.arduino.cc/reference/en/language/functions/communication/wire/) protocol and sending the data to the GUI so it does not block operations performed by Core 1. When the GUI requests to read tactile data, Core 1 enables a setting in the ESP Server which notifies Core 0 to begin reading tactile data and sending it back to the GUI through its remote client connection.
 
@@ -75,7 +75,7 @@ The diagram below illustrates an overview of how the ESP32 interfaces with the [
 </pictuer>
 
 <details>
-<summary>Arduino WiFi</summary>
+<summary>Arduino Wi-Fi</summary>
 
 The [Arduino WiFi](https://www.arduino.cc/reference/en/libraries/wifi/) library is used to create the server running on the ESP32. During setup, the [ESP Server](include/ESPServer.h) is initialized which sets the IP configuration, connects to the network defined in secrets.h, and starts the [server](https://www.arduino.cc/reference/en/libraries/wifi/server.begin). Core1 actively listens and processes incoming [WiFiClient](https://www.arduino.cc/reference/en/libraries/wifi/wificlient) connections and sends data back to the GUI using the [WiFiClient methods](https://www.arduino.cc/reference/en/libraries/wifi/client.print) method.
 </details>
@@ -100,7 +100,7 @@ The actuator for the soft robotic gripper is a [RS PRO Brushed Geared DC Geared 
 📁test/         -- project tests
 
 ## Helpful Articles
-<b>WiFi</b>  
+<b>Wi-Fi</b>  
 
 [Arduino WiFi](https://www.arduino.cc/reference/en/libraries/wifi/)
 [ESP32 Useful WiFi Library Functions](https://randomnerdtutorials.com/esp32-useful-WiFi-functions-arduino/)
