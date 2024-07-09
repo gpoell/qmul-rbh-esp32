@@ -1,8 +1,4 @@
 .pio
 .vscode
-<<<<<<< HEAD
 local_config.txt
 include/secrets.h
-=======
-local_config.txt
->>>>>>> 881f76c220ca0715c5ae99522cc6a25be03872de
