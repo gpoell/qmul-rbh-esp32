@@ -1,4 +1,5 @@
 #include "CommandPrompt.h"
+#include "Arduino.h"
 
 void CommandPrompt::prompt() {
     Serial.println("----------------------------------------------------------------------------------------------------");
@@ -21,3 +22,28 @@ void CommandPrompt::help() {
 void CommandPrompt::invalid() {
     Serial.println("Invalid command. Type help for list of commands:");
 };
+
+void CommandPrompt::setOption(String cmd) {
+    // CMD: help
+    if (cmd.equals("help")) { option = 0; }
+    // CMD: clear
+    else if (cmd.equals("clear")) { option = 1; }
+    // CMD: calibrate
+    else if (cmd.startsWith("calibrate")) { option = 2; }
+    // CMD: read
+    else if (cmd.equals("read")) { option = 3; }
+    // CMD: stop
+    else if (cmd.equals("stop")) { option = 4; }
+    // CMD: collect
+    else if (cmd.startsWith("collect")) { option = 5; }
+    // Default (nothing)
+    else { option = 9; }
+}
+
+int CommandPrompt::getOption() {
+    return option;
+}
+
+// int CommandPrompt::readCommand(String cmd) {
+
+// }
