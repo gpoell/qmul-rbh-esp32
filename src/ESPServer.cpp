@@ -41,7 +41,7 @@ void ESPServer::process_command(const String& cmd, WiFiClient& client) {
     else if (cmd.equals("disconnect")) { connected = false; guiClient.stop(); }
     else if (cmd.equals("open")) { motor.open(); }
     else if (cmd.equals("close")) { motor.close(); }
-    else if (cmd.startsWith("calibrate")) {}
+    else if (cmd.startsWith("calibrate")) { sensor.calibrate(20); }
     else if (cmd.startsWith("collect")) {}
     else if (cmd.startsWith("help")) { prompt.help(); }
     else { prompt.invalid(); }
