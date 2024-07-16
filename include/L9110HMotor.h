@@ -1,10 +1,17 @@
 /*
  * The L9110H is the H-Bridge driver for the RS PRO Brushed 1.5v - 3v DC Motor 
  * used to open and close the gripper.
- *      Parameters
- *      pin_1:          positive shaft terminal GPIO pin (default 18 (ESP32))
- *      pin_2:          negative shaft terminal GPIO pin (default 19 (ESP32))
- *      rotor_duration: length of time to turn motor (default 50ms)
+ *      
+ * Attributes
+ *      pin_1:              positive shaft terminal GPIO pin (default 18 (ESP32))
+ *      pin_2:              negative shaft terminal GPIO pin (default 19 (ESP32))
+ * 
+ * Methods
+ *      
+ *      init:               sets the pins to an output state
+ *      open_gripper:       sets pin outputs to low and high to open gripper
+ *      close_gripper:      sets pin outputs to high and low to close gripper
+ *      stop_gripper:       resets pins to stop motor
  */
 
 #ifndef L9110HMotor_h
