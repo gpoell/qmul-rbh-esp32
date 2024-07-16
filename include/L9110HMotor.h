@@ -17,19 +17,14 @@ class L9110HMotor {
     private:
         const int pin_1 {18};
         const int pin_2 {19};
-        const int enable_1 {16};
-        const int rotor_duration {150};
     public:
         L9110HMotor();
         L9110HMotor(const int r_pin1, const int r_pin2);
-        L9110HMotor(const int r_pin1, const int r_pin2, const int duration);
         ~L9110HMotor();
         void init() const;
-        void open() const;
-        void close() const;
-        void reset_pins() const;
-        void get_vals() const;
-        // pulse functionality later
+        void open_gripper() const;
+        void close_gripper() const;
+        void stop_gripper() const;
 };
 
 #endif
