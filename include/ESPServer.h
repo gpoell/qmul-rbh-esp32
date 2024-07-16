@@ -35,6 +35,7 @@
 #include "TactileSensor.h"
 #include "L9110HMotor.h"
 
+using namespace std;
 
 class ESPServer {
     private:
@@ -43,18 +44,18 @@ class ESPServer {
         CommandPrompt prompt;
         TactileSensor sensor{1};
         L9110HMotor motor;
-        vector3Double data;
         bool connected {false};
 
     public:
         ESPServer(const int port) : server(port) {};
         ~ESPServer() {};
         void init();
-        WiFiClient client_available();
         void process_command(const String& cmd, WiFiClient& client);
-        bool is_connected() {return connected;};
-        void get_tactile_data();
-        const char* create_buffer_message(std::string& message, int size);
+        void send_tactile_data(WiFiClient& client);
+        const char* create_buffer_message(string& message, int size);
+        bool is_connected() { return connected; };
+        WiFiClient get_server() { return server.available(); };
+        WiFiClient get_client() { return guiClient; };
 };
 
 #endif

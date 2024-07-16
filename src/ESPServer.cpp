@@ -1,8 +1,6 @@
 #include "ESPServer.h"
 #include "secrets.h"
 
-using namespace std;
-
 static void start_server(WiFiServer& server);
 static void set_ipaddress();
 static void connect_network();
@@ -16,15 +14,58 @@ void ESPServer::init() {
     prompt.prompt();            // Display prompt
 };
 
-WiFiClient ESPServer::client_available() {
-    return server.available();
+void ESPServer::process_command(const String& cmd, WiFiClient& client) {
+
+    const int motor_duration = 500;
+    const int calibrate_sample = 20;
+    const int collect_sample = 10;
+    
+    client.print('1');
+
+    if (cmd.startsWith("connect")) {
+        connected = true;
+        guiClient = client;
+    }
+    else if (cmd.equals("disconnect")) {
+        connected = false;
+        guiClient.stop();
+    }
+    else if (cmd.equals("open")) { 
+        motor.open_gripper();
+        delay(motor_duration);
+        motor.stop_gripper(); 
+    }
+    else if (cmd.equals("close")) {
+        motor.close_gripper();
+        delay(motor_duration);
+        motor.stop_gripper();
+    }
+    else if (cmd.startsWith("calibrate")) {
+        sensor.calibrate(calibrate_sample);
+    }
+    else if (cmd.startsWith("collect")) {
+        motor.open_gripper();
+        for (int i=0; i<collect_sample; i++) {
+            send_tactile_data(client);
+        };
+        motor.stop_gripper();
+    }
+    else if (cmd.startsWith("help")) {
+        prompt.help();
+    }
+    else {
+        prompt.invalid();
+    }
+
+    client.stop();
+    prompt.prompt();
 };
 
-void ESPServer::get_tactile_data() {
-    data = sensor.readData();
+void ESPServer::send_tactile_data(WiFiClient& client) {
+    vector3Double data = sensor.readData();
     string message = to_string(data.x) + "," + to_string(data.y) + "," + to_string(data.z) + ",";
     const char* result = create_buffer_message(message, 65);
-    guiClient.print(result);
+    client.print(result);
 };
 
 const char* ESPServer::create_buffer_message(string& message, int size) {
@@ -33,22 +74,6 @@ const char* ESPServer::create_buffer_message(string& message, int size) {
     message.append(filler);
     const char* p = message.c_str();
     return p;
-};
-
-void ESPServer::process_command(const String& cmd, WiFiClient& client) {
-
-    if (cmd.startsWith("connect")) { connected = true; guiClient = client; }
-    else if (cmd.equals("disconnect")) { connected = false; guiClient.stop(); }
-    else if (cmd.equals("open")) { motor.open(); }
-    else if (cmd.equals("close")) { motor.close(); }
-    else if (cmd.startsWith("calibrate")) { sensor.calibrate(20); }
-    else if (cmd.startsWith("collect")) {}
-    else if (cmd.startsWith("help")) { prompt.help(); }
-    else { prompt.invalid(); }
-
-    client.print('1');
-    client.stop();
-    prompt.prompt();
 };
 
 /*
