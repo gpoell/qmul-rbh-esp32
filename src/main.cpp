@@ -10,14 +10,15 @@ void setup() {
 void loop() {
 
     // Process GUI or Serial Monitor Commands
-    WiFiClient client = espserver.client_available();
-    if (client || Serial.available()) {
+    WiFiClient client = espserver.get_server();
+    if (client) {
         const String cmd = client.readStringUntil('\0');
         espserver.process_command(cmd, client);
     };
 
-    // Send Tactile Data when GUI is connected
+    // Continuously send tactile data while GUI is connected
     if (espserver.is_connected()) {
-        espserver.get_tactile_data();
+        WiFiClient guiClient = espserver.get_client(); 
+        espserver.send_tactile_data(guiClient);
     }
 }
