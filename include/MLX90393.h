@@ -8,9 +8,9 @@
 class MLX90393{
   private:
     byte address;
-    int xOffset;
-    int yOffset;
-    int zOffset;
+    int xOffset {0};
+    int yOffset {0};
+    int zOffset {0};
   
   public:
     MLX90393(byte address);

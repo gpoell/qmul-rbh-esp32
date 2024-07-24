@@ -8,9 +8,7 @@ MLX90393::MLX90393(byte address){
 }
 
 void MLX90393::init(){
-  this->xOffset = 0;
-  this->yOffset = 0;
-  this->zOffset = 0;
+  calibrate(5);
 }
 
 vector3 MLX90393::read(){
@@ -21,75 +19,84 @@ vector3 MLX90393::read(){
   byte readings[7];
   vector3 data;
 
+  // Set Sensor Mode: Single Measurement Mode (3) for XYZ values (E(14))
   Wire.beginTransmission(address);
   Wire.write(0x3E); //SMxyz command
-  int c = Wire.endTransmission();
+  int modeStatus = Wire.endTransmission();
 
-  if(c != 0){
+  if(modeStatus != 0){
     Serial.print("Read SMxyz Transmission Failed, error: ");
-    Serial.println(c);
+    Serial.println(modeStatus);
   }
 
+  // Request status byte from sensor
   Wire.requestFrom(address, byte(1));
 
-  if(Wire.available() == 1){
+  // Read status byte from sensor
+  int bytesAvailable = Wire.available();
+  if(bytesAvailable == 1) {
     byte statusByte = Wire.read();
 
-    //Check for error bit in status byte
+    //Check for error bit (bit 4) in status byte
     if(statusByte & 0b00010000){
-      Serial.print("Error in measure SMxyz");
+      Serial.print("Error in SMxyz request");
     }
-  }
+  };
 
+  // Delay 15ms specified by datasheet
   delay(15);
 
+  // Set Sensor Mode: Read Measurement (4) for XYZ values (E(14))
   Wire.beginTransmission(address);
   Wire.write(0x4E); //RMxyz command
-  c = Wire.endTransmission();
+  modeStatus = Wire.endTransmission();
 
-  if(c != 0){
+  if (modeStatus != 0) {
     Serial.print("Read RMxyz Transmission Failed, error: ");
-    Serial.println(c);
+    Serial.println(modeStatus);
   }
 
-  //7 bytes: status, xMSB, xLSB, yMSB, yLSB, zMSB, zLSB
+  // Request Data (7 bytes): status, xMSB, xLSB, yMSB, yLSB, zMSB, zLSB
   Wire.requestFrom(address, byte(7));
-    
-  if(Wire.available() == 7){
-    for(int i = 0;  i < 7; i++){
+  
+  bytesAvailable = Wire.available();
+  if (bytesAvailable == 7) {
+    for (int i = 0;  i < 7; i++) {
       readings[i] = Wire.read();
-    }
-  }
+    };
+  };
 
   //Check for error bit in status byte
-  if(readings[0] & 0b00010000){
+  if (readings[0] & 0b00010000) {
     Serial.print("Error in measure RMxyz");
-  }
+  };
 
   data.x = ((readings[1]<<8)|readings[2]) - xOffset;
   data.y = ((readings[3]<<8)|readings[4]) - yOffset;
   data.z = ((readings[5]<<8)|readings[6]) - zOffset;
 
-  return data; 
+  return data;
 }
 
 void MLX90393::calibrate(int nSamples){
-  /*Calibrate the sensor by taking the average of the first nSamples measured
-  as the XYZ offsets.
+  /*Calibrate the sensor by taking the average of the nSamples measured
+  as the XYZ offsets.*/
 
-  :nSamples: Number of samples taken to find zero offset
-  :return  : None
-  */
+  // Reset baseline so current baseline does not impact readings
+  xOffset = 0;
+  yOffset = 0;
+  zOffset = 0;
+
   long long int xSum = 0;
   long long int ySum = 0;
   long long int zSum = 0;
   
-  for(int i=0; i < nSamples; i++){
+  for (int i=0; i < nSamples; i++) {
     vector3 data = read();
     xSum += data.x;
     ySum += data.y;
     zSum += data.z;
-  }
+  };
 
   xOffset = xSum / nSamples;
   yOffset = ySum / nSamples;
