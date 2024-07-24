@@ -8,7 +8,7 @@ TactileSensor::TactileSensor(byte mplxrPin) {
 }
 
 void TactileSensor::init() {
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < sensorsSize; i++) {
     sensors[i].init();
   }
 }
@@ -22,10 +22,9 @@ void TactileSensor::calibrate(int nSamples) {
     Serial.print("Calibrating sensor chips with ");
     Serial.print(nSamples);
     Serial.print(" samples:");
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < sensorsSize; i++) {
         Serial.print(" ");
         Serial.print(i + 1);
-        sensors[i].init();
         sensors[i].calibrate(nSamples);
     }
     Serial.println();
@@ -33,31 +32,31 @@ void TactileSensor::calibrate(int nSamples) {
     Serial.println();
 }
 
-vector3Double TactileSensor::readData() {
-  /*Read measurement data of the 4 attached MLX90393 chips.
-  Calculate data average for X, Y, and Z measurements.
-  Return averaged data vector.
+sensorReadings TactileSensor::readData() {
+  /*Read measurement data of the 4 attached MLX90393 chips.*/
 
-  :returns: averaged data vector
-  */
+  sensorReadings readings;
+  vector3 rawData;
 
-  int xReadings[4];
-  int yReadings[4];
-  int zReadings[4];
-
-  for (int i = 0; i < 4; i++) {
-    vector3 rawData = sensors[i].read();
-
-    xReadings[i] = rawData.x;
-    yReadings[i] = rawData.y;
-    zReadings[i] = rawData.z;
+  for (int i = 0; i < sensorsSize; i++) {
+    rawData = sensors[i].read();
+    readings.x[i] = rawData.x;
+    readings.y[i] = rawData.y;
+    readings.z[i] = rawData.z;
   }
 
-  //Average readings of all 4 Hall-effect sensors
+  return readings;
+}
+
+vector3Double TactileSensor::readDataAverage() {
+  /*Calculate data average for X, Y, and Z measurements.*/
+
+  sensorReadings readings = readData();
   vector3Double readingAvg;
-  readingAvg.x = (xReadings[0] + xReadings[1] + xReadings[2] + xReadings[3]) / 4.0;
-  readingAvg.y = (yReadings[0] + yReadings[1] + yReadings[2] + yReadings[3]) / 4.0;
-  readingAvg.z = (zReadings[0] + zReadings[1] + zReadings[2] + zReadings[3]) / 4.0;
+
+  readingAvg.x = (readings.x[0] + readings.x[1] + readings.x[2]) / double(sensorsSize);
+  readingAvg.y = (readings.y[0] + readings.y[1] + readings.y[2]) / double(sensorsSize);
+  readingAvg.z = (readings.z[0] + readings.z[1] + readings.z[2]) / double(sensorsSize);
 
   return readingAvg;
 }
