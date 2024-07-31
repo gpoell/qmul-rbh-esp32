@@ -5,11 +5,18 @@
 #include "MLX90393.h"
 #include "vector3.h"
 #include <array>
+#include <algorithm>
 
 using namespace std;
 
 struct sensorReadings {
-  int x[3], y[3], z[3];
+  float x[3] = { 10.00 };
+  float y[3] = { 10.00 };
+  float z[3] = { 10.00 };
+};
+
+struct sensorReadingsNew {
+  array<float, 3> x, y, z;
 };
 
 class TactileSensor{
@@ -21,13 +28,15 @@ class TactileSensor{
       MLX90393(0b0001110),
       MLX90393(0b0001111)
     };
-    int sensorsSize = sensors.size();
+    const int sensorsSize = sensors.size();
   public:
     TactileSensor(byte mplxrPin);
     void init();
     void calibrate(int nSamples);
     sensorReadings readData();
+    bool readData2(sensorReadings&);
     vector3Double readDataAverage();
+    vector3Float readDataMaxZ();
     String str();
 };
 

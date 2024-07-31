@@ -61,6 +61,37 @@ vector3Double TactileSensor::readDataAverage() {
   return readingAvg;
 }
 
+bool TactileSensor::readData2(sensorReadings& readings) {
+  /* Read tactile data from each taxel and assign to data pointer */
+
+  for (int i; i<sensorsSize; i++) {
+    sensors[i].readData(&readings.x[i], &readings.y[i], &readings.z[i]);
+  };
+
+  return true;
+
+}
+
+vector3Float TactileSensor::readDataMaxZ() {
+  /* Determines the taxel with the highest Z value and returns its values .*/
+
+  // sensorReadings readings = readData();
+  sensorReadings readings;
+  readData2(readings);
+  float maxZ = max({readings.z[0], readings.z[1], readings.z[2]});
+  vector3Float readingMax;
+
+  for (int i=0; i<sensorsSize; i++) {
+    if (readings.z[i] == maxZ) {
+      readingMax.x = readings.x[i];
+      readingMax.y = readings.y[i];
+      readingMax.z = readings.z[i];
+    };
+  }
+  
+  return readingMax;
+}
+
 String TactileSensor::str() {
   return "ID:" + String(mplxrPin);
 }
