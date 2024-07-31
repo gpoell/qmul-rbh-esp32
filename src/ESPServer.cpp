@@ -17,7 +17,7 @@ void ESPServer::init() {
 void ESPServer::process_command(const String& cmd, WiFiClient& client) {
 
     const int motor_duration = 500;
-    const int calibrate_sample = 20;
+    const int calibrate_sample = 10;
     const int collect_sample = 10;
     
     client.print('1');
@@ -63,7 +63,7 @@ void ESPServer::process_command(const String& cmd, WiFiClient& client) {
 };
 
 void ESPServer::send_tactile_data(WiFiClient& client) {
-    vector3Float data = sensor.readDataMaxZ();
+    vector3 data = sensor.readDataMaxZ();
     string message = to_string(data.x) + "," + to_string(data.y) + "," + to_string(data.z) + ",";
     const char* result = create_buffer_message(message, 65);
     client.print(result);

@@ -9,74 +9,56 @@ MLX90393::MLX90393(byte address){
 
 void MLX90393::init(){
   calibrate(5);
-}
+};
 
-vector3 MLX90393::read(){
-  /*Read sensor data. Must be called after calibrate() for accurate measurements.
+void MLX90393::calibrate(int nSamples) {
+/**
+ * Calibrate the sensor by taking the average of the nSamples measured
+ * as the XYZ offsets.
+ * 
+ * @param nSamples  integer number of samples to collect for calibration
+ * 
+ */
 
-  :return: vector of measured data in X,Y,Z axes.
-  */
-  byte readings[7];
-  vector3 data;
+  // Reset baseline so current baseline does not impact readings
+  xOffset = 0.0;
+  yOffset = 0.0;
+  zOffset = 0.0;
 
-  // Set Sensor Mode: Single Measurement Mode (3) for XYZ values (E(14))
-  Wire.beginTransmission(address);
-  Wire.write(0x3E); //SMxyz command
-  int modeStatus = Wire.endTransmission();
-
-  if(modeStatus != 0){
-    Serial.print("Read SMxyz Transmission Failed, error: ");
-    Serial.println(modeStatus);
-  }
-
-  // Request status byte from sensor
-  Wire.requestFrom(address, byte(1));
-
-  // Read status byte from sensor
-  int bytesAvailable = Wire.available();
-  if(bytesAvailable == 1) {
-    byte statusByte = Wire.read();
-
-    //Check for error bit (bit 4) in status byte
-    if(statusByte & 0b00010000){
-      Serial.print("Error in SMxyz request");
-    }
-  };
-
-  // Delay 15ms specified by datasheet
-  delay(15);
-
-  // Set Sensor Mode: Read Measurement (4) for XYZ values (E(14))
-  Wire.beginTransmission(address);
-  Wire.write(0x4E); //RMxyz command
-  modeStatus = Wire.endTransmission();
-
-  if (modeStatus != 0) {
-    Serial.print("Read RMxyz Transmission Failed, error: ");
-    Serial.println(modeStatus);
-  }
-
-  // Request Data (7 bytes): status, xMSB, xLSB, yMSB, yLSB, zMSB, zLSB
-  Wire.requestFrom(address, byte(7));
+  long long int xSum = 0;
+  long long int ySum = 0;
+  long long int zSum = 0;
   
-  bytesAvailable = Wire.available();
-  if (bytesAvailable == 7) {
-    for (int i = 0;  i < 7; i++) {
-      readings[i] = Wire.read();
+  for (int i=0; i < nSamples; i++) {
+    vector3 data;
+    readData(&data.x, &data.y, &data.z);
+    xSum += data.x;
+    ySum += data.y;
+    zSum += data.z;
+  };
+
+  xOffset = xSum / nSamples;
+  yOffset = ySum / nSamples;
+  zOffset = zSum / nSamples;
+};
+
+bool MLX90393::checkStatus() {
+  /* Checks the Status Byte after starting a mode */
+
+    Wire.requestFrom(address, byte(1));
+    int bytesAvailable = Wire.available();
+    if (bytesAvailable == 1) {
+      byte statusByte = Wire.read();
+
+      //Check for error bit (bit 4) in status byte
+      if (statusByte & 0b00010000) {
+        cout << "Error in Set Mode request" << endl;
+        return false;
+      };
     };
-  };
 
-  //Check for error bit in status byte
-  if (readings[0] & 0b00010000) {
-    Serial.print("Error in measure RMxyz");
-  };
-
-  data.x = ((readings[1]<<8)|readings[2])*gain_sel.x - xOffset;
-  data.y = ((readings[3]<<8)|readings[4])*gain_sel.y - yOffset;
-  data.z = ((readings[5]<<8)|readings[6])*gain_sel.z - zOffset;
-
-  return data;
-}
+    return true;
+};
 
 bool MLX90393::readData(float *x, float *y, float *z) {
 /**
@@ -95,47 +77,8 @@ bool MLX90393::readData(float *x, float *y, float *z) {
   // Delay 15ms as specified by datasheet -- only for HS command?
   delay(15);
 
-  // Read Measurements
   return readMeasurement(x, y, z);
 };
-
-bool MLX90393::startMode(byte command) {
-/**
- * Sets the Mode for the MLX90393
- * 
- * @param command   command set specified in 15.1 Command List
- * 
- */
-
-  Wire.beginTransmission(address);
-  Wire.write(command);
-  int modeStatus = Wire.endTransmission();
-
-  if (modeStatus != 0) {
-    cout << "Read SMxyz Transmission Failed, error: " << modeStatus << endl;
-    return false;
-  };
-
-  return true;
-}
-
-bool MLX90393::checkStatus() {
-  /* Checks the Status Byte after starting a mode */
-
-    Wire.requestFrom(address, byte(1));
-    int bytesAvailable = Wire.available();
-    if (bytesAvailable == 1) {
-      byte statusByte = Wire.read();
-
-      //Check for error bit (bit 4) in status byte
-      if (statusByte & 0b00010000) {
-        cout << "Error in Set Mode request" << endl;
-        return false;
-      };
-    };
-
-    return true;
-}
 
 bool MLX90393::readMeasurement(float *x, float *y, float *z) {
 /**
@@ -177,31 +120,26 @@ bool MLX90393::readMeasurement(float *x, float *y, float *z) {
   return true;
 };
 
-void MLX90393::calibrate(int nSamples){
-  /*Calibrate the sensor by taking the average of the nSamples measured
-  as the XYZ offsets.*/
+bool MLX90393::startMode(byte command) {
+/**
+ * Sets the Mode for the MLX90393. Writes the Mode command to the sensor and
+ * verifies the status byte response.
+ * 
+ * @param command   command set specified in 15.1 Command List
+ * 
+ */
 
-  // Reset baseline so current baseline does not impact readings
-  xOffset = 0.0;
-  yOffset = 0.0;
-  zOffset = 0.0;
+  Wire.beginTransmission(address);
+  Wire.write(command);
+  int modeStatus = Wire.endTransmission();
 
-  long long int xSum = 0;
-  long long int ySum = 0;
-  long long int zSum = 0;
-  
-  for (int i=0; i < nSamples; i++) {
-    vector3 data = read();
-    xSum += data.x;
-    ySum += data.y;
-    zSum += data.z;
+  if (modeStatus != 0) {
+    cout << "Read SMxyz Transmission Failed, error: " << modeStatus << endl;
+    return false;
   };
 
-  xOffset = xSum / nSamples;
-  yOffset = ySum / nSamples;
-  zOffset = zSum / nSamples;
-
-  }
+  return true;
+}
 
 void MLX90393::reset(){
   /*Resets the sensor by sending exit (EX) command followed by reset (RT) command.

@@ -39,13 +39,12 @@ class MLX90393{
   public:
     MLX90393(byte address);
     void init();
-    vector3 read();
     void calibrate(int nSamples);
-    void reset();
-    bool startMode(byte command);
     bool checkStatus();
-    bool readMeasurement(float *x, float *y, float *z);
     bool readData(float *x, float *y, float *z);
+    bool readMeasurement(float *x, float *y, float *z);
+    bool startMode(byte command);
+    void reset();
     String str();
 };
 
