@@ -44,7 +44,8 @@ void ESPServer::process_command(const String& cmd, WiFiClient& client) {
         sensor.calibrate(calibrate_sample);
     }
     else if (cmd.startsWith("collect")) {
-        motor.open_gripper();
+        motor.close_gripper();
+        delay(200);
         for (int i=0; i<collect_sample; i++) {
             send_tactile_data(client);
         };
@@ -62,7 +63,7 @@ void ESPServer::process_command(const String& cmd, WiFiClient& client) {
 };
 
 void ESPServer::send_tactile_data(WiFiClient& client) {
-    vector3Double data = sensor.readDataAverage();
+    vector3Float data = sensor.readDataMaxZ();
     string message = to_string(data.x) + "," + to_string(data.y) + "," + to_string(data.z) + ",";
     const char* result = create_buffer_message(message, 65);
     client.print(result);
@@ -89,13 +90,13 @@ static void start_server(WiFiServer& server) {
 };
 
 static void set_ipaddress() {
-    // IPAddress local_IP(192, 168, 0, 11);
-    // IPAddress gateway(192, 168, 0, 1);
-    // IPAddress subnet(255, 255, 255, 0);
-
-    IPAddress local_IP(192, 168, 1, 11);
-    IPAddress gateway(192, 168, 1, 1);
+    IPAddress local_IP(192, 168, 0, 11);
+    IPAddress gateway(192, 168, 0, 1);
     IPAddress subnet(255, 255, 255, 0);
+
+    // IPAddress local_IP(192, 168, 1, 11);
+    // IPAddress gateway(192, 168, 1, 1);
+    // IPAddress subnet(255, 255, 255, 0);
 
     // Output an error message if the static IP address assignment fails
     if (!WiFi.config(local_IP, gateway, subnet)) {
