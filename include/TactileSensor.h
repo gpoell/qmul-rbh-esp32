@@ -14,23 +14,27 @@ struct sensorReadings {
 };
 
 class TactileSensor{
-  private:
-    byte mplxrPin;
-    array<MLX90393, 3> sensors = {
-      MLX90393(0b0001100), 
-  //  MLX90393(0b0001101), issue with this taxel chip or magnet
-      MLX90393(0b0001110),
-      MLX90393(0b0001111)
-    };
-    const int sensorsSize = sensors.size();
   public:
-    TactileSensor(byte mplxrPin);
+    TactileSensor(byte pin);
+    TactileSensor(byte pin, array<uint8_t, 3> mlxAddress);
+    TactileSensor(const TactileSensor& rhs);
+    ~TactileSensor();
     void init();
     void calibrate(int nSamples);
     bool readData(sensorReadings&);
     vector3 readDataMaxZ();
     vector3Double readDataAverage();
     String str();
+  private:
+    const byte mplxrPin;
+    array<MLX90393, 3> sensors = {
+      MLX90393(0b0001100),
+      // MLX90393(0b0001101), // issue with this taxel chip or magnet
+      MLX90393(0b0001110),
+      MLX90393(0b0001111)
+    };
+    const int sensorsSize = sensors.size();
+
 };
 
 #endif
