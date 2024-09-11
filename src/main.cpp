@@ -26,15 +26,22 @@ void setup() {
 
 void loop() {
 
-    // Process GUI or Serial Monitor Commands
+    // Process GUI Commands
     WiFiClient client = server.available();
     if (client) {
-        const String cmd = client.readStringUntil('\0');
-        gripper.processCommand(cmd);
+
+        // Convert Arduino string
+        const String ardCmd = client.readStringUntil('\0');
+        const string cmd(ardCmd.c_str(), ardCmd.length());
+
+        // Begin command processing and state machine transitions
+        gripper.processCommand(cmd, client);
+    
     };
 
     // Continuously send tactile data while GUI is connected
     if (gripper.getState() == STT_CONNECT) {
+        gripper.sendTactileData();
         // WiFiClient guiClient = espserver.get_client(); 
         // espserver.send_tactile_data(guiClient);
     }

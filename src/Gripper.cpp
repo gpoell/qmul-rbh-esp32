@@ -9,22 +9,28 @@ void Gripper::init() {
     motor.init();               // Initialize Motor
 }
 
-bool Gripper::processCommand(const String& cmd) {
+bool Gripper::processCommand(const string& cmd, WiFiClient& client) {
+    // Send client acknowledge status bit (GUI expects an initial response)
+    client.print('1');
 
     // Validate command as an option
     if (cmdOptions.count(cmd) < 1) {
-        cout << "[ERROR]: Received invalid command: " << cmd << endl;
+        CommandPrompt::invalid();
+        client.stop();
         return false;
     }
-    
-    const STT_state command = cmdOptions.at(cmd);
+    const FSM_state command = cmdOptions.at(cmd);
+
+    // Retain client for connected data reading
+    if (command == STT_CONNECT) { guiClient = client; };
 
     // Execute state transition
     state = transition(command);
+    client.stop();
     return true;
 };
 
-bool Gripper::checkTransition(const STT_state& command, STT_state& nextState) {
+bool Gripper::checkTransition(const FSM_state& command, FSM_state& nextState) {
     for (int i = 0; i < transitionTable.size(); i++) {
         if (transitionTable[i][0] == command && transitionTable[i][1] == state) {
             nextState = transitionTable[i][2];
@@ -37,11 +43,11 @@ bool Gripper::checkTransition(const STT_state& command, STT_state& nextState) {
 }
 
 
-STT_state Gripper::transition(const STT_state& command) {
+FSM_state Gripper::transition(const FSM_state& command) {
 
     // Check the State Transition Table for next state. Return previous state on errors.
-    const STT_state previousState = state;
-    STT_state nextState;
+    const FSM_state previousState = state;
+    FSM_state nextState;
     if (!checkTransition(command, nextState)) { return previousState; };
 
     // Create dynamic state object based on command and execute transitions
@@ -54,7 +60,7 @@ STT_state Gripper::transition(const STT_state& command) {
     return nextState;
 };
 
-SystemState* Gripper::createStateObj(const STT_state& command) {
+SystemState* Gripper::createStateObj(const FSM_state& command) {
     if (command == STT_OPEN) { return &StateOpen::getInstance(); };
     if (command == STT_CLOSE) { return &StateClose::getInstance(); };
     if (command == STT_CONNECT) { return &StateConnect::getInstance(); };
@@ -64,7 +70,7 @@ SystemState* Gripper::createStateObj(const STT_state& command) {
     return &StateIdle::getInstance();
 };
 
-void Gripper::setState(STT_state nextState) {
+void Gripper::setState(FSM_state nextState) {
     state = nextState;
 };
 
@@ -94,25 +100,41 @@ void Gripper::collect() {
     motor.close_gripper();
     delay(200);
     for (int i=0; i<collectSample; i++) {
-        sendTactileData(guiClient);
+        sendTactileData();
     };
     motor.stop_gripper();
 }
 
-void Gripper::sendTactileData(WiFiClient& client) {
+void Gripper::sendTactileData() {
+    
+    // Disconnect and return to IDLE if client is no longer connected
+    if (!guiClient.connected()) {
+        guiClient.stop();
+        transition(STT_DISCONNECT);
+    };
+
+    // Create a fixed buffer message with tactile data and send to client
     vector3 data = sensor.readDataMaxZ();
     string message = to_string(data.x) + "," + to_string(data.y) + "," + to_string(data.z) + ",";
     const char* result = createBufferMessage(message, 65);
-    client.print(result);
+    guiClient.print(result);
+
 };
 
-const char* createBufferMessage(string& message, int size) {
+const char* Gripper::createBufferMessage(string& message, int size) {
     int remainder = size - message.length() - 1;
     string filler(remainder, '0');
     message.append(filler);
     const char* p = message.c_str();
     return p;
 };
+
+bool Gripper::isConnected() {
+    if (state == STT_CONNECT) {
+        return true;
+    }
+    return false;
+}
 
 
 StateIdle::StateIdle() : state(STT_IDLE) {};
@@ -125,7 +147,7 @@ SystemState& StateIdle::getInstance() {
 
 bool StateIdle::beforeTransition(Gripper* gripper) {
     // clean up GUI client
-    // return gripper->destroy
+    // return gripper->disconnectClient();
     return true;
 };
 
@@ -149,7 +171,7 @@ SystemState& StateOpen::getInstance() {
 
 bool StateOpen::beforeTransition(Gripper* gripper) {
     // Future state: check motor stop button
-    // return gripper->canOpen();
+    // return gripper->isOpen();
     return true;
 };
 
@@ -218,7 +240,7 @@ SystemState& StateCalibrate::getInstance() {
 };
 
 bool StateCalibrate::beforeTransition(Gripper* gripper) {
-    return true;
+    return gripper->isConnected();
 };
 
 bool StateCalibrate::atTransition(Gripper* gripper) {
@@ -241,7 +263,7 @@ SystemState& StateCollect::getInstance() {
 };
 
 bool StateCollect::beforeTransition(Gripper* gripper) {
-    return true;
+    return gripper->isConnected();
 };
 
 bool StateCollect::atTransition(Gripper* gripper) {
