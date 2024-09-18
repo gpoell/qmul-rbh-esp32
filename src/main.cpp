@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include <Wire.h>
-#include "ESPServer.h"
 #include "secrets.h"
 #include "Gripper.h"
 
