@@ -4,9 +4,16 @@
 #include "secrets.h"
 #include "Gripper.h"
 
+enum GRIPPER_CONF {
+    SERVER_PORT = 5000,
+    WIRE_SDA = 33,
+    WIRE_SCL = 32,
+    SERIAL_BAUD = 9600
+};
+
 
 // ESPServer espserver {5000};
-WiFiServer server {5000};
+WiFiServer server {SERVER_PORT};
 Gripper gripper;
 
 
@@ -16,11 +23,12 @@ void connect_network();
 
 
 void setup() {
-    Serial.begin(9600);         // Initialize Serial
-    Wire.begin();               // Initialize I2C Communication
-    start_server(server);       // Configure and start Wi-Fi Server
-    CommandPrompt::prompt();    // Display prompt
-    gripper.init();             // Initialize Gripper
+    Serial.begin(SERIAL_BAUD);              // Initialize Serial
+    Wire.setPins(WIRE_SDA, WIRE_SCL);       // Set SDA and SCL pins on MCU
+    Wire.begin();                           // Initialize I2C Communication
+    gripper.init();                         // Initialize Gripper
+    start_server(server);                   // Configure and start Wi-Fi Server
+    CommandPrompt::prompt();                // Display prompt
 };
 
 
@@ -29,22 +37,25 @@ void loop() {
     // Process GUI Commands
     WiFiClient client = server.available();
     if (client) {
+        
+        // Send Acknowledge bit
+        client.print('1');
 
-        // Convert Arduino string
+        // Convert Arduino string and validate command
         const String ardCmd = client.readStringUntil('\0');
         const string cmd(ardCmd.c_str(), ardCmd.length());
 
         // Begin command processing and state machine transitions
         gripper.processCommand(cmd, client);
-    
+        client.stop();
+
     };
 
     // Continuously send tactile data while GUI is connected
     if (gripper.getState() == STT_CONNECT) {
         gripper.sendTactileData();
-        // WiFiClient guiClient = espserver.get_client(); 
-        // espserver.send_tactile_data(guiClient);
-    }
+    };
+
 };
 
 /*
@@ -55,7 +66,7 @@ void loop() {
  */
 
 void set_ipaddress() {
-    IPAddress local_IP(192, 168, 1, 11);
+    IPAddress local_IP(192, 168, 1, 10);
     IPAddress gateway(192, 168, 1, 1);
     IPAddress subnet(255, 255, 255, 0);
 

@@ -43,7 +43,7 @@ const std::map<string, FSM_state> cmdOptions = {
 };
 
 
-// Forward declaration for Gripper
+// Forward declaration for Gripper to solve for circular dependency
 class SystemState;
 
 class Gripper
@@ -62,18 +62,20 @@ public:
 	void calibrate();
 	void collect();
     bool isConnected();
+    bool isCommandValid(const string& cmd);
 	const char* createBufferMessage(string& message, int size);
 
 private:
 	TactileSensor sensor{1};
 	L9110HMotor motor;
     FSM_state state;
+    FSM_state nextState;
 	WiFiClient guiClient;
 	CommandPrompt prompt;
 	const int motorDelay;
 	const int calibrateSample;
 	const int collectSample;
-    bool checkTransition(const FSM_state& command, FSM_state& nextState);
+    FSM_state getNextState(const FSM_state& command);
     SystemState* createStateObj(const FSM_state& command);
     FSM_state transition(const FSM_state& command);
 };

@@ -20,18 +20,20 @@ void L9110HMotor::init() const{
 
 void L9110HMotor::open_gripper() const {
     cout << "[INFO] Opening gripper..." << endl;
-    digitalWrite(pin_1, LOW);
-    digitalWrite(pin_2, HIGH);
+    analogWrite(pin_2, 200);
+    analogWrite(pin_1, 0);
 };
 
 void L9110HMotor::close_gripper() const {
     cout << "[INFO] Closing gripper..." << endl;
-    digitalWrite(pin_1, HIGH);
-    digitalWrite(pin_2, LOW);
+    analogWrite(pin_1, 200);
+    analogWrite(pin_2, 0);
 };
 
 void L9110HMotor::stop_gripper() const {
     cout << "[INFO] Gripper stopped..." << endl;
+    analogWrite(pin_1, 0);
+    analogWrite(pin_2, 0);
     digitalWrite(pin_1, LOW);
     digitalWrite(pin_2, LOW);
 }
