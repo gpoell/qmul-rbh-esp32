@@ -7,9 +7,6 @@ L9110HMotor::L9110HMotor() {};
 L9110HMotor::L9110HMotor(const int p1, const int p2)
     : pin_1(p1), pin_2(p2) {};
 
-L9110HMotor::L9110HMotor(const int p1, const int p2, const int rd)
-    : pin_1(p1), pin_2(p2), rotor_duration(rd) {};
-
 L9110HMotor::~L9110HMotor() {};
 
 void L9110HMotor::init() const{
@@ -21,22 +18,22 @@ void L9110HMotor::init() const{
     pinMode(pin_2, OUTPUT);
 };
 
-void L9110HMotor::open() const {
+void L9110HMotor::open_gripper() const {
     cout << "[INFO] Opening gripper..." << endl;
-    digitalWrite(pin_1, LOW);
-    digitalWrite(pin_2, HIGH);
-    reset_pins();
+    analogWrite(pin_2, 200);
+    analogWrite(pin_1, 0);
 };
 
-void L9110HMotor::close() const {
+void L9110HMotor::close_gripper() const {
     cout << "[INFO] Closing gripper..." << endl;
-    digitalWrite(pin_1, HIGH);
-    digitalWrite(pin_2, LOW);
-    reset_pins();
+    analogWrite(pin_1, 200);
+    analogWrite(pin_2, 0);
 };
 
-void L9110HMotor::reset_pins() const {
-    delay(rotor_duration);
+void L9110HMotor::stop_gripper() const {
+    cout << "[INFO] Gripper stopped..." << endl;
+    analogWrite(pin_1, 0);
+    analogWrite(pin_2, 0);
     digitalWrite(pin_1, LOW);
     digitalWrite(pin_2, LOW);
 }

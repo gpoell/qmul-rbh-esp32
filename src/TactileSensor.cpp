@@ -3,65 +3,86 @@
 #include "TactileSensor.h"
 #include "vector3.h"
 
-TactileSensor::TactileSensor(byte mplxrPin) {
-  this->mplxrPin = mplxrPin;
-}
+TactileSensor::TactileSensor(byte pin = 1)
+  : mplxrPin(pin) {};
+
+TactileSensor::TactileSensor(byte pin, array<uint8_t, 3> mlxAddress)
+  : mplxrPin(pin),
+    sensors {
+      MLX90393(mlxAddress[0]),
+      MLX90393(mlxAddress[1]),
+      MLX90393(mlxAddress[2]),
+    }
+  {};
+
+TactileSensor::TactileSensor(const TactileSensor& rhs)
+  : mplxrPin(rhs.mplxrPin), sensors(rhs.sensors), sensorsSize(rhs.sensorsSize) {};
+
+TactileSensor::~TactileSensor() {};
 
 void TactileSensor::init() {
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < sensorsSize; i++) {
     sensors[i].init();
   }
-}
+};
 
 void TactileSensor::calibrate(int nSamples) {
-    /*Call calibrate method in all 4 MLX90393 chips.
+  /*Call calibrate method in all 4 MLX90393 chips.
 
-    :param nSamples: Number of samples to be taken when calculating zero offset
-    :returns: None
-    */
-    Serial.print("Calibrating sensor chips with ");
-    Serial.print(nSamples);
-    Serial.print(" samples:");
-    for (int i = 0; i < 4; i++) {
-        Serial.print(" ");
-        Serial.print(i + 1);
-        sensors[i].init();
-        sensors[i].calibrate(nSamples);
-    }
-    Serial.println();
-    Serial.println("Sensor calibration is complete...");
-    Serial.println();
-}
-
-vector3Double TactileSensor::readData() {
-  /*Read measurement data of the 4 attached MLX90393 chips.
-  Calculate data average for X, Y, and Z measurements.
-  Return averaged data vector.
-
-  :returns: averaged data vector
+  :param nSamples: Number of samples to be taken when calculating zero offset
+  :returns: None
   */
+  cout << "Calibrating sensor chips with " << nSamples << " samples: ";
+  for (int i = 0; i < sensorsSize; i++) {
+    cout << " " << i + 1;
+    sensors[i].calibrate(nSamples);
+  };
+  cout << endl << "Sensor calibration is complete..." << endl;
+};
 
-  int xReadings[4];
-  int yReadings[4];
-  int zReadings[4];
+bool TactileSensor::readData(sensorReadings& readings) {
+  /* Read tactile data from each taxel and assign to data pointer */
 
-  for (int i = 0; i < 4; i++) {
-    vector3 rawData = sensors[i].read();
+  for (int i; i<sensorsSize; i++) {
+    sensors[i].readData(&readings.x[i], &readings.y[i], &readings.z[i]);
+  };
 
-    xReadings[i] = rawData.x;
-    yReadings[i] = rawData.y;
-    zReadings[i] = rawData.z;
-  }
+  return true;
+};
 
-  //Average readings of all 4 Hall-effect sensors
+vector3 TactileSensor::readDataMaxZ() {
+  /* Determines the taxel with the highest Z value and returns its values .*/
+
+  sensorReadings readings;
+  readData(readings);
+  float maxZ = max({readings.z[0], readings.z[1], readings.z[2]});
+  vector3 readingMax;
+
+  for (int i=0; i<sensorsSize; i++) {
+    if (readings.z[i] == maxZ) {
+      readingMax.x = readings.x[i];
+      readingMax.y = readings.y[i];
+      readingMax.z = readings.z[i];
+    };
+  };
+  
+  return readingMax;
+};
+
+vector3Double TactileSensor::readDataAverage() {
+  /*Calculate data average for X, Y, and Z measurements.*/
+
+  sensorReadings readings;
+  readData(readings);
   vector3Double readingAvg;
-  readingAvg.x = (xReadings[0] + xReadings[1] + xReadings[2] + xReadings[3]) / 4.0;
-  readingAvg.y = (yReadings[0] + yReadings[1] + yReadings[2] + yReadings[3]) / 4.0;
-  readingAvg.z = (zReadings[0] + zReadings[1] + zReadings[2] + zReadings[3]) / 4.0;
+
+  readingAvg.x = (readings.x[0] + readings.x[1] + readings.x[2]) / double(sensorsSize);
+  readingAvg.y = (readings.y[0] + readings.y[1] + readings.y[2]) / double(sensorsSize);
+  readingAvg.z = (readings.z[0] + readings.z[1] + readings.z[2]) / double(sensorsSize);
 
   return readingAvg;
-}
+};
 
 String TactileSensor::str() {
   return "ID:" + String(mplxrPin);
-}
+};
