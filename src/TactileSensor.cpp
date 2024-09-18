@@ -3,9 +3,22 @@
 #include "TactileSensor.h"
 #include "vector3.h"
 
-TactileSensor::TactileSensor(byte mplxrPin) {
-  this->mplxrPin = mplxrPin;
-};
+TactileSensor::TactileSensor(byte pin = 1)
+  : mplxrPin(pin) {};
+
+TactileSensor::TactileSensor(byte pin, array<uint8_t, 3> mlxAddress)
+  : mplxrPin(pin),
+    sensors {
+      MLX90393(mlxAddress[0]),
+      MLX90393(mlxAddress[1]),
+      MLX90393(mlxAddress[2]),
+    }
+  {};
+
+TactileSensor::TactileSensor(const TactileSensor& rhs)
+  : mplxrPin(rhs.mplxrPin), sensors(rhs.sensors), sensorsSize(rhs.sensorsSize) {};
+
+TactileSensor::~TactileSensor() {};
 
 void TactileSensor::init() {
   for (int i = 0; i < sensorsSize; i++) {

@@ -3,8 +3,8 @@
  * sent by the GUI or the Serial Monitor interface.
  */
 
-#ifndef TactileLogger_h
-#define TactileLogger_h
+#ifndef CommandPrompt_h
+#define CommandPrompt_h
 
 #include <Arduino.h>
 
@@ -12,10 +12,10 @@ class CommandPrompt {
     public:
         CommandPrompt() {};
         ~CommandPrompt() {};
-        void prompt();
-        void clear();
-        void help();
-        void invalid();
+        static void prompt();
+        static void clear();
+        static void help();
+        static void invalid();
 };
 
 #endif
